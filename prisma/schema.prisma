@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  username   String
+  email      String       @unique
+  password   String
+  Credential Credential[]
+  Note       Note[]
+  Card       Card[]
+
+  @@map("users")
+}
+
+model Credential {
+  id       Int    @id @default(autoincrement())
+  user     User   @relation(fields: [userId], references: [id])
+  title    String
+  url      String
+  username String
+  password String
+
+  userId Int
+
+  @@unique([title, userId])
+  @@map("credentials")
+}
+
+model Note {
+  id         Int    @id @default(autoincrement())
+  user       User   @relation(fields: [userId], references: [id])
+  title      String
+  name       String
+  label      String
+  annotation String
+  userId     Int
+
+  @@map("notes")
+}
+
+model Card {
+  id              Int      @id @default(autoincrement())
+  user            User     @relation(fields: [userId], references: [id])
+  numbercard      Int
+  nameprintedcard String
+  securitycode    Int
+  expirationdate  DateTime
+  cardpassword    Int
+  cardtype        String
+  userId          Int
+
+  @@map("cards")
+}
