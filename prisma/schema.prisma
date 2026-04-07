@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,8 +15,20 @@ model User {
   Credential Credential[]
   Note       Note[]
   Card       Card[]
+  Session Session[]
 
   @@map("users")
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  user  User @relation(fields: [userId], references: [id])
+  token String
+  createdAt DateTime @default(now())
+
+  userId Int
+ 
+  @@map("sessions")
 }
 
 model Credential {
