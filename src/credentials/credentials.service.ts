@@ -1,26 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import type { User } from '@prisma/client';
 import { CreateCredentialDto } from './dto/create-credential.dto';
 import { UpdateCredentialDto } from './dto/update-credential.dto';
+import { CredentialsRepository } from './credentials.repository';
+import { CryptrService } from '../crypto/cryptr.service';
 
 @Injectable()
 export class CredentialsService {
-  create(createCredentialDto: CreateCredentialDto) {
-    return 'This action adds a new credential';
-  }
+    constructor(
+        private readonly credentialsRepository: CredentialsRepository,
+        private readonly cryptrService: CryptrService
+    ) { }
 
-  findAll() {
-    return `This action returns all credentials`;
-  }
+    async create(createCredentialDto: CreateCredentialDto, user: User) {
+        const { id: userId } = user;
+        const credential = await this.credentialsRepository.findByTitle(createCredentialDto.title, userId);
+        if (credential) throw new ConflictException("Title already in use!");
 
-  findOne(id: number) {
-    return `This action returns a #${id} credential`;
-  }
+        const { password } = createCredentialDto;
+        return this.credentialsRepository.create({
+            ...createCredentialDto,
+            password: this.cryptrService.encrypt(password)
+        }, userId);
+    }
 
-  update(id: number, updateCredentialDto: UpdateCredentialDto) {
-    return `This action updates a #${id} credential`;
-  }
+    async findAll() {
+        const credentials = await this.credentialsRepository.findAll();
+        return credentials;
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} credential`;
-  }
+    async findOne(id: number) {
+        const credential = await this.credentialsRepository.findOne(id);
+        if(!credential) throw new NotFoundException("Credential not found!");
+        return credential;
+    }
+
+    update(id: number, updateCredentialDto: UpdateCredentialDto) {
+        return `This action updates a #${id} credential`;
+    }
+
+    remove(id: number) {
+        return `This action removes a #${id} credential`;
+    }
 }

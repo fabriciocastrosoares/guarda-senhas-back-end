@@ -2,20 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UsersRepository {
 
-  private SALT = 10;
   constructor(private readonly prsima: PrismaService) { }
 
   create(userDto: CreateUserDto) {
     return this.prsima.user.create({
-      data: {
-        ...userDto,
-        password: bcrypt.hashSync(userDto.password, this.SALT)
-      }
+      data: userDto
     });
   }
 
@@ -40,8 +35,14 @@ export class UsersRepository {
   }
 
   getUserByEmail(email: string) {
-    return this.prsima.user.findFirst({
+    return this.prsima.user.findUnique({
       where: { email }
+    });
+  }
+
+  getUserById(id: number) {
+    return this.prsima.user.findUnique({
+      where: { id }
     });
   }
 }
