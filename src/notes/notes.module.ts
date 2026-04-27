@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { NotesController } from './notes.controller';
+import { AuthModule } from '../auth/auth.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { UsersModule } from '../users/users.module';
+import { NotesRepository } from './notes.repository';
 
 @Module({
+  imports: [AuthModule, PrismaModule, UsersModule],
   controllers: [NotesController],
-  providers: [NotesService],
+  providers: [NotesService, NotesRepository],
 })
 export class NotesModule {}

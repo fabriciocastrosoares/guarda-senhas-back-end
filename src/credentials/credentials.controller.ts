@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Put } from '@nestjs/common';
 import type { User as UserPrisma } from '@prisma/client';
 import { CredentialsService } from './credentials.service';
 import { CreateCredentialDto } from './dto/create-credential.dto';
@@ -10,7 +10,7 @@ import { User } from '../decorators/user.decorator';
 @Controller('credentials')
 
 export class CredentialsController {
-  constructor(private readonly credentialsService: CredentialsService) {}
+  constructor(private readonly credentialsService: CredentialsService) { }
 
   @Post()
   create(@User() user: UserPrisma, @Body() createCredentialDto: CreateCredentialDto) {
@@ -27,8 +27,8 @@ export class CredentialsController {
     return this.credentialsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCredentialDto: UpdateCredentialDto) {
+  @Put(":id")
+  update(@Param("id") id: string, @Body() updateCredentialDto: UpdateCredentialDto) {
     return this.credentialsService.update(+id, updateCredentialDto);
   }
 

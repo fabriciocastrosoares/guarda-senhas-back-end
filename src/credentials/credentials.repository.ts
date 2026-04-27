@@ -32,16 +32,18 @@ export class CredentialsRepository {
         })
     }
 
-      async findOne(id: number) {
+    async findOne(id: number) {
         const credential = await this.prisma.credential.findUnique({
-          where: { id }
+            where: { id }
         });
 
+        if (!credential) return null;
+
         return {
-          ...credential,
-          password: credential?.password ? this.cryptrService.decrypt(credential.password) : undefined
+            ...credential,
+            password: this.cryptrService.decrypt(credential.password)
         }
-      }
+    }
 
     findByTitle(title: string, userId: number) {
         return this.prisma.credential.findUnique({
@@ -54,15 +56,17 @@ export class CredentialsRepository {
         })
     }
 
-    //   update(id: number, updateCredentialDto: UpdateCredentialDto) {
-    //     return this.prisma.credential.update({
-    //       where: { id },
-    //       data: {
-    //         ...updateCredentialDto,
-    //         password:
-    //       }
-    //     });
-    //   }
+    update(id: number, updateCredentialDto: UpdateCredentialDto) {
+        return this.prisma.credential.update({
+            where: { id },
+            data: {
+                ...updateCredentialDto,
+                password: updateCredentialDto.password !== undefined 
+                    ? this.cryptrService.encrypt(updateCredentialDto.password)
+                    : undefined
+            }
+        })
+    }
 
     remove(id: number) {
         return this.prisma.credential.delete({

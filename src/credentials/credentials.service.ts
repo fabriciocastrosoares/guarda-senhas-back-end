@@ -31,15 +31,17 @@ export class CredentialsService {
 
     async findOne(id: number) {
         const credential = await this.credentialsRepository.findOne(id);
-        if(!credential) throw new NotFoundException("Credential not found!");
+        if (!credential) throw new NotFoundException("Credential not found!");
         return credential;
     }
 
-    update(id: number, updateCredentialDto: UpdateCredentialDto) {
-        return `This action updates a #${id} credential`;
+    async update(id: number, updateCredentialDto: UpdateCredentialDto) {
+        await this.findOne(id);
+        return this.credentialsRepository.update(id, updateCredentialDto);
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} credential`;
+    async remove(id: number) {
+        await this.findOne(id);
+        return this.credentialsRepository.remove(id);
     }
 }

@@ -6,10 +6,10 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class UsersRepository {
 
-  constructor(private readonly prsima: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) { }
 
   create(userDto: CreateUserDto) {
-    return this.prsima.user.create({
+    return this.prisma.user.create({
       data: userDto
     });
   }
@@ -35,13 +35,13 @@ export class UsersRepository {
   }
 
   getUserByEmail(email: string) {
-    return this.prsima.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email }
     });
   }
 
   getUserById(id: number) {
-    return this.prsima.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id }
     });
   }

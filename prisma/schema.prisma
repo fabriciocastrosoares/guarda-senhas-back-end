@@ -15,19 +15,19 @@ model User {
   Credential Credential[]
   Note       Note[]
   Card       Card[]
-  Session Session[]
+  Session    Session[]
 
   @@map("users")
 }
 
 model Session {
-  id Int @id @default(autoincrement())
-  user  User @relation(fields: [userId], references: [id])
-  token String
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  token     String
   createdAt DateTime @default(now())
 
   userId Int
- 
+
   @@map("sessions")
 }
 
@@ -54,19 +54,22 @@ model Note {
   annotation String
   userId     Int
 
+  @@unique([title, userId])
   @@map("notes")
 }
 
 model Card {
   id              Int      @id @default(autoincrement())
   user            User     @relation(fields: [userId], references: [id])
-  numbercard      Int
+  title           String
+  numbercard      String
   nameprintedcard String
-  securitycode    Int
+  securitycode    String
   expirationdate  DateTime
-  cardpassword    Int
+  cardpassword    String
   cardtype        String
   userId          Int
 
+  @@unique([title, userId])
   @@map("cards")
 }

@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "cards" ALTER COLUMN "numbercard" SET DATA TYPE TEXT,
+ALTER COLUMN "securitycode" SET DATA TYPE TEXT,
+ALTER COLUMN "cardpassword" SET DATA TYPE TEXT;
