@@ -22,7 +22,7 @@ model User {
 
 model Session {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String
   createdAt DateTime @default(now())
 
@@ -33,7 +33,7 @@ model Session {
 
 model Credential {
   id       Int    @id @default(autoincrement())
-  user     User   @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   title    String
   url      String
   username String
@@ -47,7 +47,7 @@ model Credential {
 
 model Note {
   id         Int    @id @default(autoincrement())
-  user       User   @relation(fields: [userId], references: [id])
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   title      String
   name       String
   label      String
@@ -60,7 +60,7 @@ model Note {
 
 model Card {
   id              Int      @id @default(autoincrement())
-  user            User     @relation(fields: [userId], references: [id])
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title           String
   numbercard      String
   nameprintedcard String

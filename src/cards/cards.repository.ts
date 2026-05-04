@@ -3,6 +3,7 @@ import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptrService } from '../crypto/cryptr.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class CardsRepository {
@@ -21,12 +22,32 @@ export class CardsRepository {
     });
   }
 
-  findAll() {
-    return `This action returns all cards`;
+  async findAll(user: User) {
+    const { id: userId } = user;
+    const cards = await this.prisma.card.findMany({
+      where: { userId }
+    });
+    return cards.map(card => {
+      return {
+        ...card,
+        securitycode: this.cryptrService.decrypt(card.securitycode),
+        cardpassword: this.cryptrService.decrypt(card.cardpassword)
+      }
+    })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} card`;
+  async findOne(id: number) {
+    const card = await this.prisma.card.findUnique({
+      where: { id }
+    });
+
+    if (!card) return null;
+
+    return {
+      ...card,
+      securitycode: this.cryptrService.decrypt(card.securitycode),
+      cardpassword: this.cryptrService.decrypt(card.cardpassword)
+    }
   }
 
   findByTitle(title: string, userId: number) {
@@ -41,10 +62,29 @@ export class CardsRepository {
   }
 
   update(id: number, updateCardDto: UpdateCardDto) {
-    return `This action updates a #${id} card`;
+    return this.prisma.card.update({
+      where: { id },
+      data: {
+        ...updateCardDto,
+        securitycode: updateCardDto.securitycode !== undefined
+          ? this.cryptrService.encrypt(updateCardDto.securitycode)
+          : undefined,
+        cardpassword: updateCardDto.cardpassword !== undefined
+          ? this.cryptrService.encrypt(updateCardDto.cardpassword)
+          : undefined
+      }
+    })
   }
 
   remove(id: number) {
-    return `This action removes a #${id} card`;
+    return this.prisma.card.delete({
+      where: { id }
+    });
+  }
+
+  removeByUserId(userId: number) {
+    return this.prisma.card.deleteMany({
+      where: { userId }
+    });
   }
 }

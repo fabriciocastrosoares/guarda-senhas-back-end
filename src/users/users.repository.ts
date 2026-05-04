@@ -14,12 +14,12 @@ export class UsersRepository {
     });
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id }
+    });
+    
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -27,7 +27,9 @@ export class UsersRepository {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    return this.prisma.user.delete({
+      where: { id }
+    });
   }
 
   getUserByUsername(username: string) {

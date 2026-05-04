@@ -10,27 +10,30 @@ export class NotesRepository {
 
   create(createNoteDto: CreateNoteDto, user: User) {
     return this.prisma.note.create({
-      data: { 
+      data: {
         userId: user.id,
         ...createNoteDto
       }
     });
   }
 
-  async findAll() {
-    return await this.prisma.note.findMany();
+  async findAll(user: User) {
+    const { id: userId } = user;
+    return await this.prisma.note.findMany({
+      where: { userId }
+    });
   }
 
   async findOne(id: number) {
     return await this.prisma.note.findUnique({
-      where:  { id }
+      where: { id }
     });
   }
 
   update(id: number, updateNoteDto: UpdateNoteDto) {
     return this.prisma.note.update({
       where: { id },
-      data: { ...updateNoteDto}
+      data: { ...updateNoteDto }
     });
   }
 
@@ -49,5 +52,11 @@ export class NotesRepository {
         }
       }
     })
+  }
+
+  removeByUserId(userId: number) {
+    return this.prisma.note.deleteMany({
+      where: { userId }
+    });
   }
 }

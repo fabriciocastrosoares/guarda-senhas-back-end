@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { CardsRepository } from './cards.repository';
@@ -15,33 +15,40 @@ export class CardsService {
   async create(createCardDto: CreateCardDto, user: User) {
     const { id: userId } = user;
     const card = await this.cardsRepository.findByTitle(createCardDto.title, userId);
-    if(card) throw new ConflictException("Title already in use!");
+    if (card) throw new ConflictException("Title already in use!");
 
     const { numbercard, securitycode, cardpassword } = createCardDto;
-        return this.cardsRepository.create({
-            title: createCardDto.title,
-            nameprintedcard: createCardDto.nameprintedcard,
-            expirationdate: createCardDto.expirationdate,
-            cardtype: createCardDto.cardtype,
-            numbercard: this.cryptrService.encrypt(numbercard),
-            securitycode: this.cryptrService.encrypt(securitycode),
-            cardpassword: this.cryptrService.encrypt(cardpassword)
-        }, userId);
+    return this.cardsRepository.create({
+      title: createCardDto.title,
+      nameprintedcard: createCardDto.nameprintedcard,
+      expirationdate: createCardDto.expirationdate,
+      cardtype: createCardDto.cardtype,
+      numbercard: createCardDto.numbercard,
+      securitycode: this.cryptrService.encrypt(securitycode),
+      cardpassword: this.cryptrService.encrypt(cardpassword)
+    }, userId);
   }
 
-  findAll() {
-    return `This action returns all cards`;
+  async findAll(user: User) {
+    const cards = await this.cardsRepository.findAll(user);
+    return cards;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} card`;
+  async findOne(id: number, user: User) {
+    const { id: userId } = user; 
+    const card = await this.cardsRepository.findOne(id);
+    if (!card) throw new NotFoundException("Card not found!");
+    if(userId !== card?.userId) throw new ForbiddenException("Card belonging to another user!");
+    return card;
   }
 
-  update(id: number, updateCardDto: UpdateCardDto) {
-    return `This action updates a #${id} card`;
+  async update(id: number, updateCardDto: UpdateCardDto, user: User) {
+    await this.findOne(id, user);
+    return this.cardsRepository.update(id, updateCardDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} card`;
+  async remove(id: number, user: User) {
+    await this.findOne(id, user);
+    return this.cardsRepository.remove(id);
   }
 }

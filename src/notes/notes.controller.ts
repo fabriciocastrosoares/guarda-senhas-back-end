@@ -17,22 +17,22 @@ export class NotesController {
   }
 
   @Get()
-  findAll() {
-    return this.notesService.findAll();
+  findAll(@User() user: UserPrisma) {
+    return this.notesService.findAll(user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notesService.findOne(+id);
+  findOne(@User() user: UserPrisma, @Param('id') id: string) {
+    return this.notesService.findOne(+id, user);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
-    return this.notesService.update(+id, updateNoteDto);
+  update(@User() user: UserPrisma, @Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
+    return this.notesService.update(+id, updateNoteDto, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notesService.remove(+id);
+  remove(@User() user: UserPrisma, @Param('id') id: string) {
+    return this.notesService.remove(+id, user);
   }
 }

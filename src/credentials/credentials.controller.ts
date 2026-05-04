@@ -18,22 +18,22 @@ export class CredentialsController {
   }
 
   @Get()
-  findAll() {
-    return this.credentialsService.findAll();
+  findAll(@User() user: UserPrisma) {
+    return this.credentialsService.findAll(user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.credentialsService.findOne(+id);
+  findOne(@User() user: UserPrisma,  @Param('id') id: string) {
+    return this.credentialsService.findOne(+id, user);
   }
 
   @Put(":id")
-  update(@Param("id") id: string, @Body() updateCredentialDto: UpdateCredentialDto) {
-    return this.credentialsService.update(+id, updateCredentialDto);
+  update(@User() user: UserPrisma, @Param("id") id: string, @Body() updateCredentialDto: UpdateCredentialDto) {
+    return this.credentialsService.update(+id, updateCredentialDto, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.credentialsService.remove(+id);
+  remove(@User() user: UserPrisma, @Param('id') id: string) {
+    return this.credentialsService.remove(+id, user);
   }
 }

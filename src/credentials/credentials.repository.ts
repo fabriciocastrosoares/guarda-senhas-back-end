@@ -3,6 +3,7 @@ import { CreateCredentialDto } from './dto/create-credential.dto';
 import { UpdateCredentialDto } from './dto/update-credential.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptrService } from '../crypto/cryptr.service';
+import { User } from '@prisma/client';
 
 
 @Injectable()
@@ -22,8 +23,11 @@ export class CredentialsRepository {
         });
     }
 
-    async findAll() {
-        const credentials = await this.prisma.credential.findMany();
+    async findAll(user: User) {
+        const { id: userId } = user;
+        const credentials = await this.prisma.credential.findMany({
+            where: { userId }
+        });
         return credentials.map(credential => {
             return {
                 ...credential,
@@ -71,6 +75,12 @@ export class CredentialsRepository {
     remove(id: number) {
         return this.prisma.credential.delete({
             where: { id }
+        });
+    }
+
+    removeByUserId(userId: number) {
+        return this.prisma.credential.deleteMany({
+            where: { userId }
         });
     }
 }

@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module, forwardRef } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
@@ -13,7 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
       issuer: 'Fabricio',
       audience: 'users'
     }
-  }), UsersModule],
+  }), forwardRef(() => UsersModule)],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [AuthService]

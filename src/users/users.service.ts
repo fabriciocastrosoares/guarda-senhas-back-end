@@ -1,17 +1,16 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BcryptService } from '../crypto/bcrypt.service';
 import { User } from '@prisma/client';
+import { EraseAccountDto } from './dto/erase-account.dto';
 
 @Injectable()
 export class UsersService {
 
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly bcrypt: BcryptService
-  ) { }
+    private readonly usersRepository: UsersRepository, private readonly bcrypt: BcryptService) { }
 
   async create(userDto: CreateUserDto) {
     const { email, password } = userDto;
@@ -24,20 +23,25 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  async findOne(id: number, user: User) {
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+    const userExist = await this.usersRepository.findOne(id);
+    if (!userExist) throw new NotFoundException("User not found!");
+    return userExist;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(user: User, eraseAccountDto: EraseAccountDto) {
+    const { id: userId, password: hash } = user;
+    const { password } = eraseAccountDto;
+
+    const isMatch = this.isMatchForPassword(user, password);
+    if (!isMatch) throw new UnauthorizedException("Invalid password");
+
+    return this.usersRepository.remove(userId);
   }
 
   async getUserByEmail(email: string) {
@@ -51,6 +55,7 @@ export class UsersService {
   }
 
   isMatchForPassword(user: User, password: string) {
-    return this.bcrypt.isMatch(password, user.password);
+    const pass = this.bcrypt.isMatch(password, user.password);
+    return pass;
   }
 }

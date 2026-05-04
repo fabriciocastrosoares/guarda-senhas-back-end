@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { User } from '@prisma/client';
 import { CreateCredentialDto } from './dto/create-credential.dto';
 import { UpdateCredentialDto } from './dto/update-credential.dto';
@@ -24,24 +24,26 @@ export class CredentialsService {
         }, userId);
     }
 
-    async findAll() {
-        const credentials = await this.credentialsRepository.findAll();
+    async findAll(user: User) {
+        const credentials = await this.credentialsRepository.findAll(user);
         return credentials;
     }
 
-    async findOne(id: number) {
+    async findOne(id: number, user: User) {
+        const { id: userId } = user;        
         const credential = await this.credentialsRepository.findOne(id);
         if (!credential) throw new NotFoundException("Credential not found!");
+        if(userId !== credential?.userId) throw new ForbiddenException("Credentials belonging to another user!");
         return credential;
     }
 
-    async update(id: number, updateCredentialDto: UpdateCredentialDto) {
-        await this.findOne(id);
+    async update(id: number, updateCredentialDto: UpdateCredentialDto, user: User) {
+        await this.findOne(id, user);
         return this.credentialsRepository.update(id, updateCredentialDto);
     }
 
-    async remove(id: number) {
-        await this.findOne(id);
+    async remove(id: number, user: User) {
+        await this.findOne(id, user);
         return this.credentialsRepository.remove(id);
     }
 }
