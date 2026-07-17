@@ -1,62 +1,136 @@
-# Guarda Senhas - Back-end
+# Guarda Senhas — Back-end
 
-Navegar na internet pode ser uma atividade muito divertida, mas ao mesmo tempo, muito perigosa.Vemos todos os dias noticias de inumeros golpes virtuais. E como poderíamos nos proteger disso? 
+Um serviço back-end para gerenciar senhas, notas e cartões de forma segura. O projeto foi desenvolvido com NestJS e usa Prisma para persistência em PostgreSQL. Destina-se a fornecer uma API REST protegida por JWT para que cada usuário possa armazenar e recuperar dados confidenciais criptografados.
 
-Criar diferentes senhas para seus aplicativos e seguras, com varios caracteres diferentes é uma forma. Porém como memorizar tudo isso? Um arquivo no google docs com o nome de "senhas" não me parece muito seguro...
+**Principais funcionalidades**
+- Cadastro e autenticação de usuários (JWT).
+- CRUD de credenciais (senhas de serviços) com criptografia.
+- CRUD de notas seguras.
+- CRUD de cartões (dados criptografados quando aplicável).
+- Sessões e validação com banco de dados via Prisma.
 
-Pensando nisso, esse projeto serve como uma "chave mestra", onde você cria um login e salva as senhas que desejar de forma segura, sendo acessado apenas por você usando a chave única que você criou. E não só isso! Sabe aquela ideia de R$ 1 milhão que você teve que não pode esquecer e nem espalhar por ai? Você pode salvar como uma nota segura. E também aquele monte de cartões que você possui. Aqui fica tudo salvo e protegido.
+**Stack principal**
+- Node.js + NestJS
+- Prisma (PostgreSQL)
+- bcrypt (hash de senhas)
+- cryptr (criptografia dos dados do usuário)
+- Jest (testes)
 
+---
 
-## Tecnologias usadas
+## Início rápido
 
-- O projeto segue o paradigma de orientação a objetos, feito em Nest.js;
-- A criptografia do usuário é feita com bcrypt e das senhas guardadas é feita com cryptr;
-- O sistema é todo testado com jest;
-- O banco usado é o PostgresSQL e é gerenciado pelo Prisma.
+Pré-requisitos
+- `Node.js` (recomendado >= 18)
+- `npm` ou `pnpm`/`yarn`
+- PostgreSQL (local ou remoto)
 
-
-Segue abaixo as instruções de configuração:
-
-Certifiquse-se de ter as seguintes ferramentas instaladas e atualizadas no seu sistema: 
-
-- [Node.js](https://nodejs.org/)
-- [npm](https://www.npmjs.com/)
-
-
-## Instalação
-
-Siga estas etapas para configurar e executar o projeto localmente:
-
+Clonar e instalar dependências
 ```bash
-   git clone https://github.com/fabriciocastrosoares/guarda-senhas-back-end.git
-   cd guarda-senhas
+git clone https://github.com/fabriciocastrosoares/guarda-senhas-back-end.git
+cd guarda-senhas
+npm install
 ```
 
-### 1 - Instalar as dependencias
-```bash
-  npm install
+Configurar variáveis de ambiente
+Crie um arquivo `.env` na raiz com ao menos as variáveis abaixo (exemplo):
+
 ```
-### 2 - Configurar a variavel de ambiente
-
-Crie um arquivo .env na raiz do projeto com as variáveis de ambiente necessárias. Você pode usar o arquivo .env.example como um modelo.
-
-### 3 - Configurar o banco de dados com o Prisma
-
-Execute as seguintes etapas
-```bash
-  npx prisma generate
-  npx prisma migrate dev
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+JWT_SECRET=uma_chave_forte_para_jwt
+CRYPTR_SECRET=uma_chave_forte_para_cryptr
+PORT=3000
 ```
 
-### 4 - Execute o projeto
+Gerar cliente Prisma e rodar migrações
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Executar em modo de desenvolvimento
+```bash
+npm run start:dev
+```
+
+Executar build e iniciar em produção
+```bash
+npm run build
+npm run start:prod
+```
+
+---
+
+## Variáveis de ambiente
+- `DATABASE_URL` — string de conexão do PostgreSQL (usada pelo Prisma).
+- `JWT_SECRET` — chave para assinar tokens JWT (usada por `@nestjs/jwt`).
+- `CRYPTR_SECRET` — chave para o `Cryptr` (criptografia dos dados sensíveis).
+- `PORT` — (opcional) porta em que a aplicação vai escutar (default `3000`).
+
+> Observação: para executar os testes de integração (E2E) crie um `.env.test` apontando para um banco de testes isolado.
+
+---
+
+## Scripts úteis
+- `npm run start` — inicia a aplicação (production via Nest).
+- `npm run start:dev` — inicia em modo desenvolvimento com hot-reload.
+- `npm run build` — compila o projeto.
+- `npm run lint` — executa ESLint e corrige problemas quando possível.
+- `npm run test` — executa testes unitários (Jest).
+- `npm run test:e2e` — executa testes E2E (ver `test/jest-e2e.json`).
+
+---
+
+## Endpoints principais (resumo)
+
+- `POST /auth/sign-up` — cria usuário.
+- `POST /auth/sign-in` — autentica e retorna token JWT.
+
+- `POST /users` — criar usuário (mesma rota usada no fluxo de cadastro).
+- `GET /users/:id` — busca dados do usuário (autenticado).
+- `DELETE /users/erase` — apagar conta (autenticado).
+
+- `POST /credentials` — criar credencial (autenticado).
+- `GET /credentials` — listar credenciais do usuário (autenticado).
+- `GET /credentials/:id` — obter credencial por id (autenticado).
+- `PUT /credentials/:id` — atualizar credencial (autenticado).
+- `DELETE /credentials/:id` — remover credencial (autenticado).
+
+- `POST /notes` — criar nota segura (autenticado).
+- `GET /notes` — listar notas (autenticado).
+- `GET /notes/:id` — obter nota (autenticado).
+- `PUT /notes/:id` — atualizar nota (autenticado).
+- `DELETE /notes/:id` — remover nota (autenticado).
+
+- `POST /cards` — criar cartão (autenticado).
+- `GET /cards` — listar cartões (autenticado).
+- `GET /cards/:id` — obter cartão (autenticado).
+- `PUT /cards/:id` — atualizar cartão (autenticado).
+- `DELETE /cards/:id` — remover cartão (autenticado).
+
+> Observação: todas as rotas de `credentials`, `notes`, `cards` e alguns `users` exigem o cabeçalho `Authorization: Bearer <token>` retornado pelo `/auth/sign-in`.
+
+---
+
+## Banco de dados (Prisma)
+
+O projeto usa Prisma com um `schema.prisma` já configurado para PostgreSQL. Para gerar o cliente e aplicar migrações locais:
 
 ```bash
-  npm run start:dev
+npx prisma generate
+npx prisma migrate dev --name init
 ```
+
+Para rodar migrações em ambiente CI/produção use:
+
+```bash
+npx prisma migrate deploy
+```
+
+---
+
 ## Testes
 
-Para execução de testes, certifique-se que você tenha na raiz do projeto um arquivo .env.test que contenha o seu banco de testes.
+- Unitários: `npm run test`
+- E2E: `npm run test:e2e` (lembre-se de preparar `.env.test` com as credenciais do banco de testes)
 
-Para executá-los, use o comando 
-```bash
-  npm run test:e2e
